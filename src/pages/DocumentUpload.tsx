@@ -119,8 +119,8 @@ export const DocumentUpload = ({ onBack, onDocumentUploaded }: DocumentUploadPro
         return updated;
       });
 
-      // Simulate AI processing
-      await simulateProcessing(docData.id, index);
+      // Process with AI
+      await processWithAI(docData.id, index);
 
     } catch (error) {
       console.error('Upload error:', error);
@@ -136,20 +136,12 @@ export const DocumentUpload = ({ onBack, onDocumentUploaded }: DocumentUploadPro
     }
   };
 
-  const simulateProcessing = async (documentId: string, index: number) => {
-    // Simulate AI processing time
-    await new Promise(resolve => setTimeout(resolve, 3000));
-
+  const processWithAI = async (documentId: string, index: number) => {
     try {
-      // Update document status to completed with mock summary
-      const { error } = await supabase
-        .from('documents')
-        .update({
-          processing_status: 'completed',
-          original_text: 'Mock extracted text from the document...',
-          simplified_summary: 'This document has been simplified using AI. The main points include key legal terms explained in plain English...'
-        })
-        .eq('id', documentId);
+      // Call the AI processing edge function
+      const { data, error } = await supabase.functions.invoke('process-document', {
+        body: { documentId }
+      });
 
       if (error) throw error;
 
@@ -161,10 +153,10 @@ export const DocumentUpload = ({ onBack, onDocumentUploaded }: DocumentUploadPro
         return updated;
       });
 
-      toast.success('Document processed successfully!');
+      toast.success('Document processed successfully with AI!');
       
     } catch (error) {
-      console.error('Processing error:', error);
+      console.error('AI processing error:', error);
       setUploadedFiles(prev => {
         const updated = [...prev];
         if (updated[index]) {
@@ -172,7 +164,7 @@ export const DocumentUpload = ({ onBack, onDocumentUploaded }: DocumentUploadPro
         }
         return updated;
       });
-      toast.error('Failed to process document');
+      toast.error('Failed to process document with AI');
     }
   };
 

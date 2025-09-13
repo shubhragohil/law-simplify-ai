@@ -4,6 +4,7 @@ import { LandingPage } from "@/components/LandingPage";
 import { Auth } from "./Auth";
 import { Dashboard } from "./Dashboard";
 import { DocumentUpload } from "./DocumentUpload";
+import { DocumentViewer } from "./DocumentViewer";
 
 type AppState = 'landing' | 'auth' | 'dashboard' | 'upload' | 'document';
 
@@ -58,6 +59,13 @@ const Index = () => {
           }}
         />
       );
+    case 'document':
+      return selectedDocumentId ? (
+        <DocumentViewer
+          documentId={selectedDocumentId}
+          onBack={() => setAppState('dashboard')}
+        />
+      ) : null;
     default:
       return <LandingPage onGetStarted={() => setAppState('auth')} />;
   }
