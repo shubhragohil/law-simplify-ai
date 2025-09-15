@@ -91,6 +91,8 @@ export type Database = {
           file_size: number
           file_type: string
           id: string
+          key_points: Json | null
+          legal_terms: Json | null
           original_filename: string
           original_text: string | null
           processing_status: string | null
@@ -98,6 +100,7 @@ export type Database = {
           title: string
           updated_at: string
           user_id: string
+          warnings: Json | null
         }
         Insert: {
           created_at?: string
@@ -105,6 +108,8 @@ export type Database = {
           file_size: number
           file_type: string
           id?: string
+          key_points?: Json | null
+          legal_terms?: Json | null
           original_filename: string
           original_text?: string | null
           processing_status?: string | null
@@ -112,6 +117,7 @@ export type Database = {
           title: string
           updated_at?: string
           user_id: string
+          warnings?: Json | null
         }
         Update: {
           created_at?: string
@@ -119,6 +125,8 @@ export type Database = {
           file_size?: number
           file_type?: string
           id?: string
+          key_points?: Json | null
+          legal_terms?: Json | null
           original_filename?: string
           original_text?: string | null
           processing_status?: string | null
@@ -126,6 +134,7 @@ export type Database = {
           title?: string
           updated_at?: string
           user_id?: string
+          warnings?: Json | null
         }
         Relationships: []
       }
