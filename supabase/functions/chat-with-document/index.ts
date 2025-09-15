@@ -15,10 +15,10 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    const googleApiKey = Deno.env.get('GOOGLE_API_KEY');
 
-    if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured');
+    if (!googleApiKey) {
+      throw new Error('Google API key not configured');
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -58,7 +58,7 @@ serve(async (req) => {
     const { data: chatHistory, error: historyError } = await supabase
       .from('chat_messages')
       .select('*')
-      .eq('session_id', chatSessionId)
+      .eq('chat_session_id', chatSessionId)
       .order('created_at', { ascending: true })
       .limit(20);
 
@@ -70,7 +70,8 @@ serve(async (req) => {
     await supabase
       .from('chat_messages')
       .insert({
-        session_id: chatSessionId,
+        chat_session_id: chatSessionId,
+        user_id: userId,
         role: 'user',
         content: message
       });
@@ -85,11 +86,8 @@ Warnings: ${document.warnings ? JSON.stringify(document.warnings) : 'None'}
 Original Text Preview: ${document.original_text ? document.original_text.substring(0, 2000) : 'Not available'}
 `;
 
-    // Prepare chat messages for OpenAI
-    const messages = [
-      {
-        role: 'system',
-        content: `You are a helpful legal assistant that helps users understand their legal documents. You have access to the following document:
+    // Prepare system prompt for Gemini
+    const systemPrompt = `You are a helpful legal assistant that helps users understand their legal documents. You have access to the following document:
 
 ${documentContext}
 
@@ -100,55 +98,61 @@ Your role is to:
 4. Provide guidance on next steps or actions needed
 5. Always remind users that this is informational and they should consult a lawyer for official legal advice
 
-Be conversational, helpful, and always reference the specific document when answering questions.`
-      }
-    ];
+Be conversational, helpful, and always reference the specific document when answering questions.`;
 
-    // Add chat history
+    // Prepare chat history for context
+    let conversationHistory = '';
     if (chatHistory) {
       chatHistory.forEach(msg => {
-        messages.push({
-          role: msg.role,
-          content: msg.content
-        });
+        conversationHistory += `${msg.role === 'user' ? 'User' : 'Assistant'}: ${msg.content}\n`;
       });
     }
 
-    // Add current user message
-    messages.push({
-      role: 'user',
-      content: message
-    });
+    const fullPrompt = `${systemPrompt}
 
-    // Get AI response
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+Previous conversation:
+${conversationHistory}
+
+Current user question: ${message}
+
+Please provide a helpful response about the legal document.`;
+
+    // Get AI response using Gemini
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${googleApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: messages,
-        temperature: 0.7,
-        max_tokens: 1000,
+        contents: [{
+          parts: [{
+            text: fullPrompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        }
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('OpenAI API error:', errorData);
+      console.error('Gemini API error:', errorData);
       throw new Error('Failed to get AI response');
     }
 
     const aiResponse = await response.json();
-    const aiMessage = aiResponse.choices[0].message.content;
+    const aiMessage = aiResponse.candidates[0].content.parts[0].text;
 
     // Save AI response
     const { data: savedMessage, error: saveError } = await supabase
       .from('chat_messages')
       .insert({
-        session_id: chatSessionId,
+        chat_session_id: chatSessionId,
+        user_id: userId,
         role: 'assistant',
         content: aiMessage
       })

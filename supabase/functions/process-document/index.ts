@@ -15,10 +15,10 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    const googleApiKey = Deno.env.get('GOOGLE_API_KEY');
 
-    if (!openaiApiKey) {
-      throw new Error('OpenAI API key not configured');
+    if (!googleApiKey) {
+      throw new Error('Google API key not configured');
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -50,19 +50,8 @@ serve(async (req) => {
     const text = await fileData.text();
     console.log('Extracted text length:', text.length);
 
-    // Use OpenAI to create summary
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: `You are a legal document expert. Your job is to:
+    // Use Gemini API to create summary
+    const prompt = `You are a legal document expert. Your job is to:
 1. Extract the main content from legal documents
 2. Create a simplified summary in plain English
 3. Identify key legal terms and explain them
@@ -72,33 +61,51 @@ Format your response as JSON with these fields:
 - summary: A clear, simplified explanation of the document in plain English
 - keyPoints: Array of the most important points
 - legalTerms: Array of legal terms with simple explanations
-- warnings: Array of important warnings or things to watch out for`
-          },
-          {
-            role: 'user',
-            content: `Please analyze this legal document and provide a simplified summary:\n\n${text.substring(0, 8000)}`
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 2000,
+- warnings: Array of important warnings or things to watch out for
+
+Please analyze this legal document and provide a simplified summary:
+
+${text.substring(0, 50000)}`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${googleApiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.3,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 2048,
+        }
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.text();
-      console.error('OpenAI API error:', errorData);
+      console.error('Gemini API error:', errorData);
       throw new Error('Failed to process document with AI');
     }
 
     const aiResponse = await response.json();
+    const aiContent = aiResponse.candidates[0].content.parts[0].text;
     let analysisResult;
 
     try {
-      analysisResult = JSON.parse(aiResponse.choices[0].message.content);
+      // Extract JSON from the response if it's wrapped in markdown
+      const jsonMatch = aiContent.match(/```json\s*([\s\S]*?)\s*```/);
+      const jsonText = jsonMatch ? jsonMatch[1] : aiContent;
+      analysisResult = JSON.parse(jsonText);
     } catch {
       // Fallback if AI doesn't return valid JSON
       analysisResult = {
-        summary: aiResponse.choices[0].message.content,
+        summary: aiContent,
         keyPoints: ['Please review the document for important details'],
         legalTerms: [],
         warnings: ['Please consult with a legal professional for official advice']
