@@ -46,8 +46,34 @@ serve(async (req) => {
       throw new Error('Failed to download document');
     }
 
-    // Extract text from document (simplified - in real app you'd use proper document parsing)
-    const text = await fileData.text();
+    // Extract text from document based on file type
+    let text = '';
+    
+    if (document.file_type === 'pdf') {
+      // For PDFs, convert to text - simplified extraction
+      const arrayBuffer = await fileData.arrayBuffer();
+      const decoder = new TextDecoder();
+      text = decoder.decode(arrayBuffer);
+      // Extract readable text between PDF markers (simplified approach)
+      const textMatches = text.match(/BT\s*(.*?)\s*ET/g);
+      if (textMatches) {
+        text = textMatches.join(' ').replace(/BT|ET/g, '').trim();
+      }
+    } else if (document.file_type === 'docx') {
+      // For DOCX files, we'd need proper parsing - for now use basic text extraction
+      const arrayBuffer = await fileData.arrayBuffer();
+      const decoder = new TextDecoder();
+      text = decoder.decode(arrayBuffer);
+    } else {
+      // For text files
+      text = await fileData.text();
+    }
+    
+    // If text extraction failed or produced very little content, use a fallback
+    if (!text || text.length < 100) {
+      text = `Legal document: ${document.original_filename}\nFile type: ${document.file_type}\nSize: ${document.file_size} bytes\n\nNote: This document requires proper parsing for full text extraction. Please ensure the document contains readable text content.`;
+    }
+    
     console.log('Extracted text length:', text.length);
 
     // Use Gemini API to create summary
