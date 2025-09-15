@@ -97,7 +97,7 @@ export const DocumentViewer = ({ documentId, onBack }: DocumentViewerProps) => {
         const { data: messages, error: messagesError } = await supabase
           .from('chat_messages')
           .select('id, role, content, created_at')
-          .eq('session_id', session.id)
+          .eq('chat_session_id', session.id)
           .order('created_at', { ascending: true });
 
         if (messagesError) throw messagesError;
