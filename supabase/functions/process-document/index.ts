@@ -48,22 +48,35 @@ serve(async (req) => {
 
     // Extract text from document based on file type
     let text = '';
+    let extractedContent = '';
     
     try {
       if (document.file_type === 'pdf') {
-        // For PDFs, convert to text - simplified extraction
+        // For PDFs, try multiple extraction methods
         const arrayBuffer = await fileData.arrayBuffer();
         const decoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: false });
         const rawText = decoder.decode(arrayBuffer);
         
-        // Extract readable text between PDF markers (simplified approach)
+        // Method 1: Extract text between PDF text markers
         const textMatches = rawText.match(/BT\s*(.*?)\s*ET/g);
         if (textMatches && textMatches.length > 0) {
-          text = textMatches.join(' ').replace(/BT|ET/g, '').trim();
-        } else {
-          // Fallback: extract any printable ASCII text
-          text = rawText.replace(/[^\x20-\x7E\s]/g, ' ').replace(/\s+/g, ' ').trim();
+          extractedContent = textMatches.join(' ').replace(/BT|ET/g, '').trim();
         }
+        
+        // Method 2: Extract from PDF streams
+        if (!extractedContent || extractedContent.length < 50) {
+          const streamMatches = rawText.match(/stream\s*([\s\S]*?)\s*endstream/g);
+          if (streamMatches) {
+            extractedContent = streamMatches.join(' ').replace(/stream|endstream/g, '').trim();
+          }
+        }
+        
+        // Method 3: Extract any readable ASCII text
+        if (!extractedContent || extractedContent.length < 50) {
+          extractedContent = rawText.replace(/[^\x20-\x7E\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+        
+        text = extractedContent;
       } else if (document.file_type === 'docx') {
         // For DOCX files, we'd need proper parsing - for now use basic text extraction
         const arrayBuffer = await fileData.arrayBuffer();
@@ -83,9 +96,14 @@ serve(async (req) => {
     // Clean the text to remove null bytes and problematic Unicode characters
     text = text.replace(/\0/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
     
-    // If text extraction failed or produced very little content, use a fallback
-    if (!text || text.length < 50) {
-      text = `Legal document: ${document.original_filename}\nFile type: ${document.file_type}\nSize: ${document.file_size} bytes\n\nThis document contains binary data that requires specialized parsing tools for full text extraction. The document has been uploaded successfully and can be referenced in conversations, though detailed text analysis may be limited.`;
+    // Always provide content for AI processing, even if extraction failed
+    if (!text || text.length < 20) {
+      text = `Legal document uploaded: ${document.original_filename}
+File type: ${document.file_type}
+File size: ${document.file_size} bytes
+Upload date: ${new Date().toISOString()}
+
+This is a ${document.file_type.toUpperCase()} legal document that has been uploaded to the system. While automatic text extraction was limited due to the document's formatting or encoding, this document is available for legal consultation and analysis. The document may contain important legal information, contracts, agreements, or other legal content that should be reviewed by qualified legal professionals.`;
     }
     
     console.log('Extracted text length:', text.length);
