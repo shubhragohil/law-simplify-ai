@@ -49,29 +49,43 @@ serve(async (req) => {
     // Extract text from document based on file type
     let text = '';
     
-    if (document.file_type === 'pdf') {
-      // For PDFs, convert to text - simplified extraction
-      const arrayBuffer = await fileData.arrayBuffer();
-      const decoder = new TextDecoder();
-      text = decoder.decode(arrayBuffer);
-      // Extract readable text between PDF markers (simplified approach)
-      const textMatches = text.match(/BT\s*(.*?)\s*ET/g);
-      if (textMatches) {
-        text = textMatches.join(' ').replace(/BT|ET/g, '').trim();
+    try {
+      if (document.file_type === 'pdf') {
+        // For PDFs, convert to text - simplified extraction
+        const arrayBuffer = await fileData.arrayBuffer();
+        const decoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: false });
+        const rawText = decoder.decode(arrayBuffer);
+        
+        // Extract readable text between PDF markers (simplified approach)
+        const textMatches = rawText.match(/BT\s*(.*?)\s*ET/g);
+        if (textMatches && textMatches.length > 0) {
+          text = textMatches.join(' ').replace(/BT|ET/g, '').trim();
+        } else {
+          // Fallback: extract any printable ASCII text
+          text = rawText.replace(/[^\x20-\x7E\s]/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+      } else if (document.file_type === 'docx') {
+        // For DOCX files, we'd need proper parsing - for now use basic text extraction
+        const arrayBuffer = await fileData.arrayBuffer();
+        const decoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: false });
+        const rawText = decoder.decode(arrayBuffer);
+        // Extract any readable text and clean it
+        text = rawText.replace(/[^\x20-\x7E\s]/g, ' ').replace(/\s+/g, ' ').trim();
+      } else {
+        // For text files
+        text = await fileData.text();
       }
-    } else if (document.file_type === 'docx') {
-      // For DOCX files, we'd need proper parsing - for now use basic text extraction
-      const arrayBuffer = await fileData.arrayBuffer();
-      const decoder = new TextDecoder();
-      text = decoder.decode(arrayBuffer);
-    } else {
-      // For text files
-      text = await fileData.text();
+    } catch (error) {
+      console.error('Text extraction error:', error);
+      text = '';
     }
     
+    // Clean the text to remove null bytes and problematic Unicode characters
+    text = text.replace(/\0/g, '').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
+    
     // If text extraction failed or produced very little content, use a fallback
-    if (!text || text.length < 100) {
-      text = `Legal document: ${document.original_filename}\nFile type: ${document.file_type}\nSize: ${document.file_size} bytes\n\nNote: This document requires proper parsing for full text extraction. Please ensure the document contains readable text content.`;
+    if (!text || text.length < 50) {
+      text = `Legal document: ${document.original_filename}\nFile type: ${document.file_type}\nSize: ${document.file_size} bytes\n\nThis document contains binary data that requires specialized parsing tools for full text extraction. The document has been uploaded successfully and can be referenced in conversations, though detailed text analysis may be limited.`;
     }
     
     console.log('Extracted text length:', text.length);
