@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import LegalHighlighter from "@/components/LegalHighlighter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -247,7 +248,7 @@ export const DocumentViewer = ({ documentId, onBack }: DocumentViewerProps) => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm leading-relaxed">{document.simplified_summary}</p>
+                  <LegalHighlighter text={document.simplified_summary} />
                 </CardContent>
               </Card>
             </motion.div>

@@ -43,6 +43,13 @@ Legal Document Simplifier - Professional Legal Theme
     --law-gold-foreground: 220 26% 14%;
     --law-silver: 210 11% 71%;
     --law-silver-foreground: 220 26% 14%;
+    
+    /* Legal severity colors */
+    --legal-critical: 0 84% 60%;
+    --legal-high: 20 85% 55%;
+    --legal-medium: 45 85% 50%;
+    --legal-low: 140 60% 45%;
+    --legal-info: 210 100% 60%;
 
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(210 100% 8%), hsl(210 100% 25%));
@@ -108,6 +115,13 @@ Legal Document Simplifier - Professional Legal Theme
     --law-gold-foreground: 220 26% 14%;
     --law-silver: 210 11% 71%;
     --law-silver-foreground: 220 26% 14%;
+    
+    /* Legal severity colors - dark mode */
+    --legal-critical: 0 84% 65%;
+    --legal-high: 20 85% 60%;
+    --legal-medium: 45 85% 55%;
+    --legal-low: 140 60% 50%;
+    --legal-info: 210 100% 65%;
 
     /* Gradients - dark mode */
     --gradient-primary: linear-gradient(135deg, hsl(45 76% 48%), hsl(45 76% 65%));
@@ -188,6 +202,41 @@ Legal Document Simplifier - Professional Legal Theme
   
   .legal-gradient {
     @apply bg-gradient-to-br from-primary to-law-gold text-primary-foreground;
+  }
+  
+  /* Legal severity highlighting classes */
+  .legal-highlight-critical {
+    @apply bg-destructive/20 text-destructive-foreground border-destructive/40 px-1 rounded-sm border;
+    background-color: hsl(var(--legal-critical) / 0.2);
+    border-color: hsl(var(--legal-critical) / 0.4);
+  }
+  
+  .legal-highlight-high {
+    @apply px-1 rounded-sm border;
+    background-color: hsl(var(--legal-high) / 0.2);
+    border-color: hsl(var(--legal-high) / 0.4);
+    color: hsl(var(--legal-high));
+  }
+  
+  .legal-highlight-medium {
+    @apply px-1 rounded-sm border;
+    background-color: hsl(var(--legal-medium) / 0.2);
+    border-color: hsl(var(--legal-medium) / 0.4);
+    color: hsl(var(--legal-medium));
+  }
+  
+  .legal-highlight-low {
+    @apply px-1 rounded-sm border;
+    background-color: hsl(var(--legal-low) / 0.2);
+    border-color: hsl(var(--legal-low) / 0.4);
+    color: hsl(var(--legal-low));
+  }
+  
+  .legal-highlight-info {
+    @apply px-1 rounded-sm border;
+    background-color: hsl(var(--legal-info) / 0.2);
+    border-color: hsl(var(--legal-info) / 0.4);
+    color: hsl(var(--legal-info));
   }
 }
 

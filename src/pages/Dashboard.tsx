@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { FileText, Upload, MessageSquare, LogOut, Search, User, Plus, Clock, Download, Eye, RefreshCw } from "lucide-react";
+import { FileText, Upload, MessageSquare, LogOut, Search, User, Plus, Clock, Download, Eye, RefreshCw, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { reprocessStuckDocuments } from "@/utils/reprocessDocuments";
+import DeleteDocumentDialog from "@/components/DeleteDocumentDialog";
 
 interface Document {
   id: string;
@@ -20,6 +21,7 @@ interface Document {
   processing_status: string;
   created_at: string;
   simplified_summary?: string;
+  file_path: string;
 }
 
 interface DashboardProps {
@@ -32,6 +34,11 @@ export const Dashboard = ({ onNavigateToUpload, onNavigateToDocument }: Dashboar
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [deleteDialog, setDeleteDialog] = useState<{ isOpen: boolean; document: Document | null }>({
+    isOpen: false,
+    document: null,
+  });
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchDocuments();
@@ -46,13 +53,21 @@ export const Dashboard = ({ onNavigateToUpload, onNavigateToDocument }: Dashboar
 
       if (error) {
         console.error('Error fetching documents:', error);
-        toast.error("Failed to load documents");
+        toast({
+          title: "Error",
+          description: "Failed to load documents",
+          variant: "destructive",
+        });
       } else {
         setDocuments(data || []);
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error("Failed to load documents");
+      toast({
+        title: "Error", 
+        description: "Failed to load documents",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -87,11 +102,33 @@ export const Dashboard = ({ onNavigateToUpload, onNavigateToDocument }: Dashboar
   };
 
   const handleReprocessDocuments = async () => {
-    toast.info('Reprocessing stuck documents...');
-    await reprocessStuckDocuments();
-    // Refresh the documents list
-    fetchDocuments();
-    toast.success('Reprocessing completed!');
+    try {
+      toast({
+        title: "Processing",
+        description: "Reprocessing stuck documents...",
+      });
+      await reprocessStuckDocuments();
+      await fetchDocuments(); // Refresh the documents list
+      toast({
+        title: "Success",
+        description: "Reprocessing completed!",
+      });
+    } catch (error) {
+      console.error('Error reprocessing documents:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reprocess documents",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteDocument = (document: Document) => {
+    setDeleteDialog({ isOpen: true, document });
+  };
+
+  const handleDeleteSuccess = () => {
+    fetchDocuments(); // Refresh the documents list
   };
 
   return (
@@ -302,11 +339,26 @@ export const Dashboard = ({ onNavigateToUpload, onNavigateToDocument }: Dashboar
                           View
                         </Button>
                         {doc.processing_status === 'completed' && (
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => onNavigateToDocument(doc.id)}
+                          >
                             <MessageSquare className="h-3 w-3 mr-1" />
                             Chat
                           </Button>
                         )}
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteDocument(doc);
+                          }}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -340,6 +392,13 @@ export const Dashboard = ({ onNavigateToUpload, onNavigateToDocument }: Dashboar
           )}
         </motion.div>
       </div>
+
+      <DeleteDocumentDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, document: null })}
+        document={deleteDialog.document}
+        onDeleteSuccess={handleDeleteSuccess}
+      />
     </div>
   );
 };
