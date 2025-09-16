@@ -138,12 +138,23 @@ export const DocumentUpload = ({ onBack, onDocumentUploaded }: DocumentUploadPro
 
   const processWithAI = async (documentId: string, index: number) => {
     try {
+      console.log('Starting AI processing for document:', documentId);
+      
       // Call the AI processing edge function
       const { data, error } = await supabase.functions.invoke('process-document', {
         body: { documentId }
       });
 
-      if (error) throw error;
+      console.log('AI processing response:', { data, error });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
+
+      if (!data || !data.success) {
+        throw new Error(data?.error || 'AI processing failed');
+      }
 
       setUploadedFiles(prev => {
         const updated = [...prev];
@@ -164,7 +175,7 @@ export const DocumentUpload = ({ onBack, onDocumentUploaded }: DocumentUploadPro
         }
         return updated;
       });
-      toast.error('Failed to process document with AI');
+      toast.error(`Failed to process document with AI: ${error.message}`);
     }
   };
 

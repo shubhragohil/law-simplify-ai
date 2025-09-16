@@ -159,13 +159,21 @@ ${text.substring(0, 50000)}`;
         processing_status: 'completed',
         original_text: text.substring(0, 10000), // Store first 10k chars
         simplified_summary: analysisResult.summary,
-        key_points: analysisResult.keyPoints,
-        legal_terms: analysisResult.legalTerms,
-        warnings: analysisResult.warnings
+        key_points: analysisResult.keyPoints || [],
+        legal_terms: analysisResult.legalTerms || [],
+        warnings: analysisResult.warnings || []
       })
       .eq('id', documentId);
 
     if (updateError) {
+      console.error('Database update error:', updateError);
+      
+      // Update status to error if database update fails
+      await supabase
+        .from('documents')
+        .update({ processing_status: 'error' })
+        .eq('id', documentId);
+        
       throw updateError;
     }
 
@@ -182,6 +190,17 @@ ${text.substring(0, 50000)}`;
 
   } catch (error) {
     console.error('Error processing document:', error);
+    
+    // Update document status to error
+    try {
+      await supabase
+        .from('documents')
+        .update({ processing_status: 'error' })
+        .eq('id', documentId);
+    } catch (statusUpdateError) {
+      console.error('Failed to update document status to error:', statusUpdateError);
+    }
+    
     return new Response(
       JSON.stringify({ 
         error: error.message,

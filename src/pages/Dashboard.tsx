@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
-import { FileText, Upload, MessageSquare, LogOut, Search, User, Plus, Clock, Download, Eye } from "lucide-react";
+import { FileText, Upload, MessageSquare, LogOut, Search, User, Plus, Clock, Download, Eye, RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { reprocessStuckDocuments } from "@/utils/reprocessDocuments";
 
 interface Document {
   id: string;
@@ -83,6 +84,14 @@ export const Dashboard = ({ onNavigateToUpload, onNavigateToDocument }: Dashboar
       case 'pending': return 'Pending';
       default: return status;
     }
+  };
+
+  const handleReprocessDocuments = async () => {
+    toast.info('Reprocessing stuck documents...');
+    await reprocessStuckDocuments();
+    // Refresh the documents list
+    fetchDocuments();
+    toast.success('Reprocessing completed!');
   };
 
   return (
@@ -228,6 +237,12 @@ export const Dashboard = ({ onNavigateToUpload, onNavigateToDocument }: Dashboar
                 <Plus className="h-4 w-4 mr-2" />
                 Upload New
               </Button>
+              {processingCount > 0 && (
+                <Button onClick={handleReprocessDocuments} size="sm" variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry Processing
+                </Button>
+              )}
             </div>
           </div>
 
