@@ -137,10 +137,8 @@ export const Dashboard = ({ onNavigateToUpload, onNavigateToDocument }: Dashboar
       <nav className="border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 legal-gradient rounded-lg flex items-center justify-center">
-              <FileText className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-foreground">LegalEase</span>
+            <img src="/src/assets/logo.png" alt="LegalEase AI Logo" className="h-8 w-8 rounded-lg" />
+            <span className="text-2xl font-bold text-foreground">LegalEase AI</span>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -243,9 +241,14 @@ export const Dashboard = ({ onNavigateToUpload, onNavigateToDocument }: Dashboar
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Start Q&A Session
                 </Button>
-                <Button variant="outline" className="flex-1" disabled={documents.length === 0}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Export Documents
+                <Button 
+                  variant="outline" 
+                  className="flex-1" 
+                  onClick={handleReprocessDocuments}
+                  disabled={processingCount === 0}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reprocess Documents
                 </Button>
               </div>
             </CardContent>

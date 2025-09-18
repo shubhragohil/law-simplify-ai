@@ -227,10 +227,8 @@ export const DocumentUpload = ({ onBack, onDocumentUploaded }: DocumentUploadPro
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex items-center space-x-2">
-              <div className="h-8 w-8 legal-gradient rounded-lg flex items-center justify-center">
-                <FileText className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-2xl font-bold text-foreground">LegalEase</span>
+              <img src="/src/assets/logo.png" alt="LegalEase AI Logo" className="h-8 w-8 rounded-lg" />
+              <span className="text-2xl font-bold text-foreground">LegalEase AI</span>
             </div>
           </div>
           <ThemeToggle />

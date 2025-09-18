@@ -25,11 +25,11 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
       title: "Interactive Q&A Chat",
       description: "Ask questions about your documents and get instant, accurate answers"
     },
-    {
-      icon: Download,
-      title: "Export & Share",
-      description: "Download simplified summaries or share them with your team"
-    },
+        {
+          icon: Shield,
+          title: "Legal Term Highlighting",
+          description: "Important legal terms are color-coded by severity level for easy identification"
+        },
     {
       icon: Shield,
       title: "Secure & Private",
@@ -70,10 +70,8 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center space-x-2"
           >
-            <div className="h-8 w-8 legal-gradient rounded-lg flex items-center justify-center">
-              <FileText className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-foreground">LegalEase</span>
+            <img src="/src/assets/logo.png" alt="LegalEase AI Logo" className="h-8 w-8 rounded-lg" />
+            <span className="text-2xl font-bold text-foreground">LegalEase AI</span>
           </motion.div>
           
           <div className="flex items-center space-x-4">
@@ -302,10 +300,8 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="h-8 w-8 legal-gradient rounded-lg flex items-center justify-center">
-                <FileText className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-2xl font-bold">LegalEase</span>
+              <img src="/src/assets/logo.png" alt="LegalEase AI Logo" className="h-8 w-8 rounded-lg" />
+              <span className="text-2xl font-bold">LegalEase AI</span>
             </div>
             <div className="text-muted-foreground">
               © 2024 LegalEase. Making legal documents accessible to everyone.

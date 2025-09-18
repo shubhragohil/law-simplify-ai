@@ -120,10 +120,8 @@ export const Auth = () => {
       <nav className="border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="h-8 w-8 legal-gradient rounded-lg flex items-center justify-center">
-              <FileText className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-2xl font-bold text-foreground">LegalEase</span>
+            <img src="/src/assets/logo.png" alt="LegalEase AI Logo" className="h-8 w-8 rounded-lg" />
+            <span className="text-2xl font-bold text-foreground">LegalEase AI</span>
           </div>
           <ThemeToggle />
         </div>
