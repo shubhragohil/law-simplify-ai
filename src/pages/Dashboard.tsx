@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { reprocessStuckDocuments } from "@/utils/reprocessDocuments";
 import DeleteDocumentDialog from "@/components/DeleteDocumentDialog";
+import logoImage from "@/assets/logo.png";
 
 interface Document {
   id: string;
@@ -137,7 +138,7 @@ export const Dashboard = ({ onNavigateToUpload, onNavigateToDocument }: Dashboar
       <nav className="border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <img src="/src/assets/logo.png" alt="LegalEase AI Logo" className="h-8 w-8 rounded-lg" />
+            <img src={logoImage} alt="LegalEase AI Logo" className="h-10 w-10 object-contain" />
             <span className="text-2xl font-bold text-foreground">LegalEase AI</span>
           </div>
           

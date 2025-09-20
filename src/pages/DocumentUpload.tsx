@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import logoImage from "@/assets/logo.png";
 
 interface UploadedFile {
   file: File;
@@ -227,7 +228,7 @@ export const DocumentUpload = ({ onBack, onDocumentUploaded }: DocumentUploadPro
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div className="flex items-center space-x-2">
-              <img src="/src/assets/logo.png" alt="LegalEase AI Logo" className="h-8 w-8 rounded-lg" />
+              <img src={logoImage} alt="LegalEase AI Logo" className="h-10 w-10 object-contain" />
               <span className="text-2xl font-bold text-foreground">LegalEase AI</span>
             </div>
           </div>

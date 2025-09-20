@@ -9,6 +9,7 @@ import { FileText, Mail, Lock, User, Chrome } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import logoImage from "@/assets/logo.png";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -120,7 +121,7 @@ export const Auth = () => {
       <nav className="border-b border-border/40 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <img src="/src/assets/logo.png" alt="LegalEase AI Logo" className="h-8 w-8 rounded-lg" />
+            <img src={logoImage} alt="LegalEase AI Logo" className="h-10 w-10 object-contain" />
             <span className="text-2xl font-bold text-foreground">LegalEase AI</span>
           </div>
           <ThemeToggle />

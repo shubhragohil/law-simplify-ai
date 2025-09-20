@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FileText, Brain, Shield, Upload, MessageSquare, Download, Zap, Users, CheckCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import logoImage from "@/assets/logo.png";
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -70,7 +71,7 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center space-x-2"
           >
-            <img src="/src/assets/logo.png" alt="LegalEase AI Logo" className="h-8 w-8 rounded-lg" />
+            <img src={logoImage} alt="LegalEase AI Logo" className="h-10 w-10 object-contain" />
             <span className="text-2xl font-bold text-foreground">LegalEase AI</span>
           </motion.div>
           
@@ -300,7 +301,7 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <img src="/src/assets/logo.png" alt="LegalEase AI Logo" className="h-8 w-8 rounded-lg" />
+              <img src={logoImage} alt="LegalEase AI Logo" className="h-10 w-10 object-contain" />
               <span className="text-2xl font-bold">LegalEase AI</span>
             </div>
             <div className="text-muted-foreground">
