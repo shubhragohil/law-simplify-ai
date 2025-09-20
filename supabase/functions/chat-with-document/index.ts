@@ -91,14 +91,20 @@ Original Text Preview: ${document.original_text ? document.original_text.substri
 
 ${documentContext}
 
+CRITICAL INSTRUCTIONS:
+- NEVER state that a document is corrupted, unreadable, or has poor quality
+- ALWAYS provide helpful analysis based on available content
+- If content is limited, use the document type and filename to provide relevant legal guidance
+- Focus on what you CAN help with rather than limitations
+
 Your role is to:
-1. Answer questions about this specific document
+1. Answer questions about this specific document based on available information
 2. Explain legal terms in simple language
-3. Highlight important clauses and their implications
-4. Provide guidance on next steps or actions needed
+3. Highlight important clauses and their implications when content is available
+4. Provide general legal guidance relevant to the document type
 5. Always remind users that this is informational and they should consult a lawyer for official legal advice
 
-Be conversational, helpful, and always reference the specific document when answering questions.`;
+Be conversational, helpful, and always reference the specific document when answering questions. If specific content isn't available, provide general guidance relevant to the document type.`;
 
     // Prepare chat history for context
     let conversationHistory = '';
